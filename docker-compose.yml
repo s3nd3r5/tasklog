@@ -1,0 +1,28 @@
+version: "3"
+services:
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "4430:443"
+    volumes:
+      - "${PWD}/volumes/www:/usr/share/nginx/html:ro"
+  postgres:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "tasklog"
+      POSTGRES_PASSWORD_FILE: "/.postgres_password"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - "${PWD}/sql:/docker-entrypoint-initdb.d:ro"
+      - "${PWD}/secrets/postgres_password:/.postgres_password:ro"
+      - "${PWD}/volumes/pgdata:/var/lib/postgresql/data"
+  taskbot:
+    build: ./taskbot/
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    volumes:
+      - "${PWD}/secrets/tasklog.cfg:/secrets/tasklog.cfg"
