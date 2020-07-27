@@ -1,8 +1,10 @@
 import logging
 import configparser
+import uuid
+import time
 from flask import Flask, render_template, url_for, flash, redirect, request
 import psycopg2
-from psycopg2.extras import execute_batch
+from psycopg2.extras import execute_batch, register_uuid
 
 # constants
 DATE_FMT = '%Y-%m-%dT%H:%M'
@@ -89,23 +91,24 @@ def db_connect(config, max_retries=5):
 
 ## check the input coming from the server
 def validate_task_ids(task_ids):
-    return True 
-# TODO - migrate to UUID ids
-#    if type(task_ids) is not list:
-#        return False
-#    for id in task_ids:
-#        try:
-#            if not uuid.UUID(id).version:
-#                return False
-#        except ValueError:
-#            return False
-#    return True
+    if type(task_ids) is not list:
+        logging.warning('tasks not list')
+        return False
+    for id in task_ids:
+        try:
+            if not uuid.UUID(id).version:
+                logging.warning('not uuid')
+                return False
+        except ValueError:
+            logging.warning('value error', exc_info=True)
+            return False
+    return True
 
 ## copy list into list of tuples
-def to_tuples(some_list):
+def ids_to_uuid_tuples(some_list):
     copy_list = []
     for v in some_list:
-        copy_list.append((v, ))
+        copy_list.append((uuid.UUID(v), ))
     return copy_list
 
 # copy cfg configuration subset into application (uppercasing keys)
@@ -115,12 +118,23 @@ def configureApp(app, configItems):
         updateDict[k.upper()] = v
     app.config.update(updateDict)
 
+# determine redirect - is host https:// or less? (http:// or somethign else ??
+# TODO - this seems hacky, mabye setup better CORs handling 
+def handle_redirect(request):
+    if (request.referrer and request.referrer.find(request.host) <= 7):
+        return redirect(request.referrer)
+    else:
+        logging.warning('referer [%s] did not match [%s], could not redirect', request.referrer, request.host)
+        flash('Unable to complete redirect to original page', 'warning')
+        return redirect(url_for('open'))
+
 # utils
 logging.basicConfig(format='%(asctime)s - [%(levelname)s]\t%(message)s',
         datefmt='%Y-%m-%dT%H:%M:%S',
         level=logging.INFO)
 config = configparser.ConfigParser()
 config.read_file(open('/secrets/tasklog.cfg'))
+register_uuid() # allow DB to use UUIDs
 
 # flask
 app = Flask(__name__)
@@ -130,7 +144,6 @@ conn = db_connect(config['db'])
 @app.route('/')
 @app.route('/open')
 def open():
-    logging.info("Get tasks for all types")
     cursor = None
     try:
         cursor = conn.cursor()
@@ -149,7 +162,6 @@ def open():
 # TODO - can we validate this so we don't make SQL requests w/o the tasks existing?
 @app.route('/open/<string:task_type>')
 def open_tasks(task_type):
-    logging.info("Get tasks for type: %s", task_type)
     cursor = None
     try:
         cursor = conn.cursor()
@@ -171,20 +183,17 @@ def open_tasks(task_type):
 def action_complete():
     cursor = None
     try:
-        if validate_task_ids(request.form['completedTasks']):
-            task_ids = to_tuples(request.form.getlist('completedTasks'))
+        rqIds = request.form.getlist('completedTasks')
+        if validate_task_ids(rqIds):
+            task_ids = ids_to_uuid_tuples(rqIds)
             cursor = conn.cursor()
             execute_batch(cursor, SQL_COMPLETE_TASKS, task_ids)
             conn.commit()
             flash('Successfully compelted {} tasks'.format(len(task_ids)), 'success')
-            # determine redirect - is host https:// or less? (http:// or somethign else ??
-            # TODO - this seems hacky, mabye setup better CORs handling 
-            if (request.referrer and request.referrer.find(request.host) <= 7):
-                    return redirect(request.referrer)
-            else:
-                logging.warning('referer [%s] did not match [%s], could not redirect', request.referrer, request.host)
-                flash('Unable to complete redirect to original page', 'warning')
-                return redirect(url_for('open'))
+            return handle_redirect(request)
+        else:
+            flash('Bad request - server got unexpected request data. Refresh and try again', 'warning')
+            return handle_redirect(request)
     except KeyError as e:
         logging.debug('Empty form submitted to: %s', url_for('action_complete'))
     except:

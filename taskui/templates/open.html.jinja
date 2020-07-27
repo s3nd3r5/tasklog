@@ -24,7 +24,7 @@
       <table>
         <thead>
           <tr>
-            <th> Id </th> 
+            <th> # </th> 
             <th> Date </th> 
             {% if not by_type %}  <th> Type </th> {% endif %}
             <th> User </th> 
@@ -35,7 +35,7 @@
         <tbody>
         {% for task in tasks %}
         <tr>
-          <td> {{ task.id }} </td>
+          <td> {{ loop.index }} </td>
           <td> {{ task.date }} </td>
           {% if not by_type %}<td> {{ task.type }} </td>{% endif %}
           <td> {{ task.user }} </td>

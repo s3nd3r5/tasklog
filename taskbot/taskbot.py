@@ -1,14 +1,16 @@
 import time
 import logging
 import configparser
+import uuid
 import discord
 from discord.ext import commands
 import psycopg2
+from psycopg2.extras import register_uuid
 
 ## constants
 sql_insert="""
-INSERT INTO tasks (task_type, created_by, source, task_body)
-VALUES(%s, %s, %s, %s)
+INSERT INTO tasks (task_id, task_type, created_by, source, task_body)
+VALUES(%s, %s, %s, %s, %s)
 """.strip()
 
 sql_queue="""
@@ -63,12 +65,13 @@ logging.basicConfig(format='%(asctime)s - [%(levelname)s]\t%(message)s',
         level=logging.INFO)
 config = configparser.ConfigParser()
 config.read_file(open('/secrets/tasklog.cfg'))
+register_uuid() # allow DB to use UUIDs
 
 ## variables
 prefixes = setup_prefixes(config['taskbot'])
 task_types = config['tasklog']['task_types'].split(',')
 bot = commands.Bot(command_prefix=prefixes, description=config['taskbot']['description'])
-conn = db_connect(config['db']) 
+conn = db_connect(config['db'])
 
 ## bot setup
 @bot.event
@@ -134,7 +137,7 @@ async def _request(ctx, *body):
                     cid=ctx.message.channel.id, cname=ctx.message.channel.name))
     try:
         cursor = conn.cursor()
-        cursor.execute(sql_insert, (task_type, created_by, source, task_body))
+        cursor.execute(sql_insert, (uuid.uuid4(), task_type, created_by, source, task_body))
         conn.commit()
         if cursor.statusmessage == insert_success:
             return await ctx.message.add_reaction(emoji='👍')
