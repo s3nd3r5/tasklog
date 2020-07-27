@@ -13,7 +13,7 @@ Before each service can run you will need to ensure the expected files are creat
 ### Taskbot
 
 Requires a bot to be created, and a token 
-See requirements.txt for dependencies. 
+See requirements.txt for full list of dependencies.
 
 #### Commands
 
@@ -37,7 +37,8 @@ A complete list of commands can be found at the top of the taskbot.py file
 
 ### Taskui
 
-Flask UI for managing tasks
+Flask UI for managing tasks.
+See requirements.txt for full list of dependencies.
 
 #### What can you manage?
 
@@ -83,3 +84,30 @@ which can then be executed via `\i /path/to/file.sql`.
 
  - secrets/pgpass - password file for postgres db
 
+# How to run
+
+To run all of the services you must create the folder `secrets` and `volumes` in the workding directory where you're deploying these services.
+
+Make a copy of `tasklog.cfg` and place it in `secrets/`. Fill out the config.
+
+Make a new file `postgres_password` and place it in `secrets/`. This password should match that in `tasklog.cfg`. 
+
+Then you can run `docker-compose --build -up -d`
+
+## I screwed up the DB and need to start over
+
+You can stop and remove everything with: `docker-compose down -v --rmi=all` to make a fresh start and then clear the DB volume with `sudo rm -r secrets/pgdata`
+
+If you get conflicts when restarting the postgres you can clear all the old unattached volumes with: `docker volume prune` and `docker rm $(docker ps -aq)`.
+
+# Powered By / Credits
+
+This project is powered by:
+
+- [docker](https://www.docker.com) via [compose](https://docs.docker.com/compose/) for running all the services
+  - [postgreSQL](https://www.postgresql.org) for storage (via container image)
+  - [nginx](https://www.nginx.com/) for webservering (wip) (via container image)
+- [python](https://www.python.org/) version 3+
+  - [discord.py](https://github.com/Rapptz/discord.py) for [discord](https://discord.com) integration (taskbot)
+  - [flask](https://flask.palletsprojects.com/en/1.1.x/) for web backend/ui templating (taskui)
+  - [psycopg2](https://www.psycopg.org/) to interface with postgreSQL
