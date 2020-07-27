@@ -92,15 +92,12 @@ def db_connect(config, max_retries=5):
 ## check the input coming from the server
 def validate_task_ids(task_ids):
     if type(task_ids) is not list:
-        logging.warning('tasks not list')
         return False
     for id in task_ids:
         try:
             if not uuid.UUID(id).version:
-                logging.warning('not uuid')
                 return False
         except ValueError:
-            logging.warning('value error', exc_info=True)
             return False
     return True
 
@@ -184,6 +181,9 @@ def action_complete():
     cursor = None
     try:
         rqIds = request.form.getlist('completedTasks')
+        if not rqIds:
+            flash("At least one request required to submit", 'warning')
+            return handle_redirect(request)
         if validate_task_ids(rqIds):
             task_ids = ids_to_uuid_tuples(rqIds)
             cursor = conn.cursor()
