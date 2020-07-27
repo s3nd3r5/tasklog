@@ -35,7 +35,6 @@ td.empty-table-message {
 .flash-container {
   display: flex;
   color: #fff;
-  padding: 4px;
 }
 
 /* message is the default category in Flask */
@@ -58,12 +57,12 @@ td.empty-table-message {
 .flash-message-body {
   display: inline-block;
   flex-grow: 1;
-  padding: 8px;
+  padding: 12px;
 }
 
 .flash-dismiss {
   display: inline-block;
-  padding: 8px;
+  padding: 12px;
   text-decoration: underline;
 }
 
