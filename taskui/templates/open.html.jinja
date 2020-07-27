@@ -43,13 +43,19 @@
           <td class='action'> <input autocomplete='off' type='checkbox' name="completedTasks" value="{{ task.id }}" />
         </tr>
         {% endfor %}
+        {% if tasks|length == 0 %}
+        <tr>
+          <td colspan="6" class='empty-table-message' > No {{ title | lower }} tasks! </td>
+        </tr>
+        {% endif %}
         </tbody>
       </table>
-      <label> Submit completed tasks
-        <input type='submit' id='submit' text='Submit' />
-      </label>
-      <p>Check all of the tasks that are now completed, and sumbit them with the submit button above.
-      </p>
+      <div class='submit-container'>
+        <input type='submit' id='submit' value='Submit Complete Tasks' {% if tasks|length == 0 %} disabled {% endif %} />
+        <p>
+          Check all of the tasks that are now completed, and sumbit them with the submit button above.
+        </p>
+      </div>
     </form>
     <footer>    
       <nav>

@@ -8,20 +8,14 @@ body {
 
 table {
 	border: double grey;
+  border-collapse: collapse;
   margin: 16px 0px;
 }
 
 td, th {
+  border: 1px solid grey;
 	text-align: left;
 	padding-left: 10px;
-}
-
-td:not(:first-child), th:not(:first-child) {
-	border-left: 1px solid grey;
-}
-
-tr:not(:last-child) > td, th {
-	border-bottom: 1px solid grey;
 }
 
 td.wide, th.wide {
@@ -31,6 +25,11 @@ td.wide, th.wide {
 td.action, th.action {
 	text-align: right;
 	width: 5%; /* keep as small as possible */
+}
+
+td.empty-table-message {
+  padding: 8px 0;
+  text-align: center;
 }
 
 .flash-container {
@@ -80,6 +79,10 @@ td.action, th.action {
 }
 .flash-container > input[type=checkbox]:checked ~ .flash-dismiss {
   display: none;
+}
+
+.submit-container {
+  text-align: right;
 }
 
 footer {
