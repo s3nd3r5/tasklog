@@ -26,3 +26,12 @@ services:
       - postgres
     volumes:
       - "${PWD}/secrets/tasklog.cfg:/secrets/tasklog.cfg"
+  taskui:
+    build: ./taskui/
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    volumes:
+      - "${PWD}/secrets/tasklog.cfg:/secrets/tasklog.cfg"

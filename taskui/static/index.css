@@ -1,0 +1,89 @@
+html {
+  margin: 0;
+}
+
+body {
+  margin: 16px 10%;
+}
+
+table {
+	border: double grey;
+  margin: 16px 0px;
+}
+
+td, th {
+	text-align: left;
+	padding-left: 10px;
+}
+
+td:not(:first-child), th:not(:first-child) {
+	border-left: 1px solid grey;
+}
+
+tr:not(:last-child) > td, th {
+	border-bottom: 1px solid grey;
+}
+
+td.wide, th.wide {
+  width: 50%; 
+}
+
+td.action, th.action {
+	text-align: right;
+	width: 5%; /* keep as small as possible */
+}
+
+.flash-container {
+  display: flex;
+  color: #fff;
+}
+
+.flash-container, .flash-info {
+  background-color: #1a66ff;
+}
+
+.flash-success {
+  background-color: #00e64d;
+}
+
+.flash-error {
+  background-color: #e60000;
+}
+
+.flash-warning {
+  background-color: #ff6600;
+}
+
+.flash-message {
+  display: inline-block;
+  flex-grow: 1;
+  padding: 8px;
+  size: 14pt;
+  line-height: 14pt;
+}
+
+.flash-dismiss {
+  display: inline-block;
+  padding: 8px;
+  font-size: 10pt; 
+  line-height: 14pt; /* align with flash-message */
+  text-decoration: underline;
+}
+
+.flash-dismiss:hover {
+  cursor: pointer;
+}
+
+/* hide flash on dismiss */
+.flash-container > input[type=checkbox]:checked ~ .flash-message {
+  display: none;
+}
+.flash-container > input[type=checkbox]:checked ~ .flash-dismiss {
+  display: none;
+}
+
+footer {
+  border-top: 1px solid grey;
+  padding: 16px 0;
+  margin: 16px 0;
+}

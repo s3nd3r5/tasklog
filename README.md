@@ -33,7 +33,36 @@ A complete list of commands can be found at the top of the taskbot.py file
 
 #### Expected Files
 
-- secrets/tasklog.cfg - a filled out copy of the tasklog.ini (see taskbot.py for required values)
+- secrets/tasklog.cfg - a filled out copy of the tasklog.cfg (see taskbot.py for required values)
+
+### Taskui
+
+Flask UI for managing tasks
+
+#### What can you manage?
+
+Right now you can only mark tasks as complete
+
+#### Usage
+
+As of this commit to access navigate to: http://localhost:5000/ to open the main portal
+
+##### Task view
+
+To view open tasks by type you can navigate to: http://localhost:5000/open/<tasktype>
+
+##### Completed (wip)
+
+To view previously completed tasks you can navigate to: http://localhost:5000/completed
+
+This view is not yet complete.
+
+#### Expected files
+
+- secrets/tasklog.cfg - a filled out copy of the tasklog.cfg (see taskui.py for required values)
+
+The values for `taskui` section are flask specific configurations. They will will be copied into their upper-case values
+in `app.config`. See flasks documentation to see what configurations can be set, they may require custom code to operate.
 
 ### Postgres Db
 
