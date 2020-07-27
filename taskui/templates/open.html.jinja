@@ -12,7 +12,7 @@
         {% for category, message in messages %}
         <div class='flash-container flash-{{category}}'>
             <input hidden id='flash-category-{{ loop.index }}' type='checkbox' />
-            <div class='flash-message'>
+            <div class='flash-message-body'>
               {{ message }}
             </div>
             <label class='flash-dismiss' for='flash-category-{{ loop.index }}'>Dismiss</label>

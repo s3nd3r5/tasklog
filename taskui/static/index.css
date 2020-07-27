@@ -35,9 +35,11 @@ td.empty-table-message {
 .flash-container {
   display: flex;
   color: #fff;
+  padding: 4px;
 }
 
-.flash-container, .flash-info {
+/* message is the default category in Flask */
+.flash-container, .flash-message, .flash-info {
   background-color: #1a66ff;
 }
 
@@ -53,19 +55,15 @@ td.empty-table-message {
   background-color: #ff6600;
 }
 
-.flash-message {
+.flash-message-body {
   display: inline-block;
   flex-grow: 1;
   padding: 8px;
-  size: 14pt;
-  line-height: 14pt;
 }
 
 .flash-dismiss {
   display: inline-block;
   padding: 8px;
-  font-size: 10pt; 
-  line-height: 14pt; /* align with flash-message */
   text-decoration: underline;
 }
 
@@ -74,7 +72,7 @@ td.empty-table-message {
 }
 
 /* hide flash on dismiss */
-.flash-container > input[type=checkbox]:checked ~ .flash-message {
+.flash-container > input[type=checkbox]:checked ~ .flash-message-body {
   display: none;
 }
 .flash-container > input[type=checkbox]:checked ~ .flash-dismiss {
