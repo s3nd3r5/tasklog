@@ -1,3 +1,8 @@
+"""
+Copyright (c) 2020 s3nd3r5
+This source is subject to MIT license.
+See LICENSE or go to https://opensource.org/licenses/MIT for full license details.
+"""
 import time
 import logging
 import configparser
