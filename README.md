@@ -17,7 +17,7 @@ See requirements.txt for dependencies.
 
 #### Commands
 
-The bot takes in requests via the: `!request` prefix
+The bot takes in requests via the: `!request` prefix\* - *the prefix(es) can be configured in the tasklog.cfg*
 
 **Making a request**
 `!request [type] [body]` - this will categorize the request by type and capture the rest of the message body. 
