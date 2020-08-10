@@ -37,27 +37,43 @@ WHERE completed = false AND task_type != %s
 
 SQL_COMPLETE_TASKS = """
 UPDATE tasks
-SET completed = true
+SET completed = true, completed_at = now()
 WHERE task_id = %s
 """.strip() # TODO - completed on
 
+SQL_SELECT_COMPLETED = """
+SELECT task_id, created_at, task_type, created_by, task_body, completed_at
+FROM tasks
+WHERE completed = true
+ORDER BY completed_at DESC
+"""
 
 # helpers
 
 ## UI friendly task object
 class Task:
-    def __init__(self, id, date, type, user, body):
+    def __init__(self, id, date, type, user, body, completed_at=None):
         self.id = id
+        self.created_at = date
         self.date = date.strftime(DATE_FMT)
         self.type = type
         self.user = user
         self.body = body
+        if completed_at:
+            self.completed_date = completed_at.strftime(DATE_FMT)
+            self.completed_at = completed_at
+        else:
+            self.completed_at = None
+            self.compelted_date = None
 
 ## map select to task object
 def map_to_tasks(queryResult):
     tasks = []
     for r in queryResult:
-        tasks.append(Task(r[0], r[1], r[2], r[3], r[4]))
+        completed_at = None
+        if len(r) > 5:
+            completed_at = r[5]
+        tasks.append(Task(r[0], r[1], r[2], r[3], r[4], completed_at))
     return tasks
 
 ## provide a function to ensure nothing leaks from query objet
@@ -130,6 +146,34 @@ def handle_redirect(request):
         logging.warning('referer [%s] did not match [%s], could not redirect', request.referrer, request.host)
         flash('Unable to complete redirect to original page', 'warning')
         return redirect(url_for('open'))
+
+def calc_completed_stats(tasks, types):
+    stats = dict()
+    if not tasks or len(tasks) == 0:
+        return stats
+    # average completion time
+    avg_t = 0
+    for t in tasks:
+        d = t.completed_at - t.created_at
+        avg_t += d.total_seconds()
+    avg_t = avg_t / len(tasks)
+    hours, rem = divmod(avg_t, 3600)
+    minutes, seconds = divmod(rem, 60)
+    stats["Avg. Compeltion Time"] = "{} days, {} minutes and {} seconds".format(round(hours), round(minutes), round(seconds))
+
+    # Total per type
+    for t in types:
+        key = "Total {}".format(t.title())
+        stats[key] = 0
+
+    for t in tasks:
+        tt = t.type
+        key = "Total {}".format(tt.title())
+        if stats.get(key):
+            stats[key] += 1
+        else:
+            stats[key] = 1
+    return stats
 
 # utils
 logging.basicConfig(format='%(asctime)s - [%(levelname)s]\t%(message)s',
@@ -213,6 +257,30 @@ def action_complete():
 
 @app.route('/completed')
 def compelted():
-    return 'Completed'
+    cursor = None
+    try:
+        cursor = conn.cursor()
+
+        # get completed tasks
+        cursor.execute(SQL_SELECT_COMPLETED)
+        res = cursor.fetchall()
+
+        # map to tasks
+        tasks = map_to_tasks(res)
+
+        # get the open types for navigation
+        cursor.execute(SQL_SELECT_TYPES, ('', ))
+        res = cursor.fetchall()
+        types = map_to_types(res)
+
+        # calculate stats
+        stats = calc_completed_stats(tasks, types)
+        return render_template('completed.html.jinja', title='Completed', tasks=tasks, stats=stats, types=types)
+    except:
+        logging.error('Failed to load completed tasks', exc_info=True)
+        return render_template('error.html.jinja', message='Failed to load complete tasks. Please return and try again'), 500
+    finally:
+        if cursor:
+            cursor.close()
 
 

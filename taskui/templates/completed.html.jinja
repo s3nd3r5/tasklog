@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>{{ title }} Tasks</title>
+    <link rel='stylesheet' type='text/css' href="{{ url_for('static', filename='index.css') }}" />
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+  </head>
+  <body>
+    <h1> {{ title }} ({{ tasks|length }})</h1>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class='flash-container flash-{{category}}'>
+            <input hidden id='flash-category-{{ loop.index }}' type='checkbox' />
+            <div class='flash-message-body'>
+              {{ message }}
+            </div>
+            <label class='flash-dismiss' for='flash-category-{{ loop.index }}'>Dismiss</label>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <table>
+      <thead>
+        <tr>
+          <th> # </th> 
+          <th> Requested </th> 
+          <th> Completed </th>
+          <th> Type </th>
+          <th> User </th> 
+          <th class='wide'> Request </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td> {{ loop.index }} </td>
+          <td> {{ task.date }} </td>
+          <td> {{ task.completed_date }} </td>
+          <td> {{ task.type }} </td>
+          <td> {{ task.user }} </td>
+          <td> {{ task.body }} </td>
+        </tr>
+        {% endfor %}
+        {% if tasks|length == 0 %}
+        <tr>
+          <td colspan="6" class='empty-table-message' > No {{ title | lower }} tasks :( </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+    <details>
+      <summary> Stats </summary>
+      <ul>
+        {% for k in stats %}
+        <li> <b> {{ k }} </b> {{ stats[k] }} </li>
+        {% endfor %}
+      </ul>
+    </details>
+    <footer>    
+      <nav>
+        <a href="{{ url_for('open') }}">All Open</a> |
+        {% for type in types%}
+        <a href="{{ url_for('open_tasks', task_type=type) }}">{{ type }}</a> {% if not loop.last %}|{% endif %}
+        {% endfor %}
+      </nav>
+      <p>
+        Navigate to one of they type filters to view by specific type.
+        For a history click <a href="/completed">completed</a> to view the completed tasks.
+      </p>
+    </footer>
+  </body>
+</html>
