@@ -10,12 +10,14 @@ table {
 	border: double grey;
   border-collapse: collapse;
   margin: 16px 0px;
+  width: 100%;
 }
 
 td, th {
   border: 1px solid grey;
 	text-align: left;
 	padding-left: 10px;
+  height: 24px;
 }
 
 td.wide, th.wide {
