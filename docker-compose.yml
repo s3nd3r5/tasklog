@@ -19,6 +19,7 @@ services:
       - "${PWD}/sql:/docker-entrypoint-initdb.d:ro"
       - "${PWD}/secrets/postgres_password:/.postgres_password:ro"
       - "${PWD}/volumes/pgdata:/var/lib/postgresql/data"
+      - "/etc/localtime:/etc/localtime:ro"
   taskbot:
     build: ./taskbot/
     restart: unless-stopped
@@ -26,6 +27,7 @@ services:
       - postgres
     volumes:
       - "${PWD}/secrets/tasklog.cfg:/secrets/tasklog.cfg"
+      - "/etc/localtime:/etc/localtime:ro"
   taskui:
     build: ./taskui/
     restart: unless-stopped
@@ -35,3 +37,4 @@ services:
       - postgres
     volumes:
       - "${PWD}/secrets/tasklog.cfg:/secrets/tasklog.cfg"
+      - "/etc/localtime:/etc/localtime:ro"
