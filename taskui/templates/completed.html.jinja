@@ -20,35 +20,37 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
-    <table>
-      <thead>
-        <tr>
-          <th> # </th> 
-          <th> Requested </th> 
-          <th> Completed </th>
-          <th> Type </th>
-          <th> User </th> 
-          <th class='wide'> Request </th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for task in tasks %}
-        <tr>
-          <td> {{ loop.index }} </td>
-          <td> {{ task.date }} </td>
-          <td> {{ task.completed_date }} </td>
-          <td> {{ task.type }} </td>
-          <td> {{ task.user }} </td>
-          <td> {{ task.body }} </td>
-        </tr>
-        {% endfor %}
-        {% if tasks|length == 0 %}
-        <tr>
-          <td colspan="6" class='empty-table-message' > No {{ title | lower }} tasks :( </td>
-        </tr>
-        {% endif %}
-      </tbody>
-    </table>
+    <div class='tablewrapper'>
+      <table>
+        <thead>
+          <tr>
+            <th> # </th>
+            <th> Requested </th>
+            <th> Completed </th>
+            <th> Type </th>
+            <th> User </th>
+            <th class='wide'> Request </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+          <tr>
+            <td> {{ loop.index }} </td>
+            <td> {{ task.date }} </td>
+            <td> {{ task.completed_date }} </td>
+            <td> {{ task.type }} </td>
+            <td> {{ task.user }} </td>
+            <td> {{ task.body }} </td>
+          </tr>
+          {% endfor %}
+          {% if tasks|length == 0 %}
+          <tr>
+            <td colspan="6" class='empty-table-message' > No {{ title | lower }} tasks :( </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
     <details>
       <summary> Stats </summary>
       <ul>
@@ -57,7 +59,7 @@
         {% endfor %}
       </ul>
     </details>
-    <footer>    
+    <footer>
       <nav>
         <a href="{{ url_for('open') }}">All Open</a> |
         {% for type in types%}
