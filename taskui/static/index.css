@@ -11,6 +11,8 @@ table {
   border-collapse: collapse;
   margin: 16px 0px;
   width: 100%;
+  display: block;
+  overflow-x: auto;
 }
 
 td, th {
