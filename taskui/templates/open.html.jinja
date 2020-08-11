@@ -21,35 +21,37 @@
       {% endif %}
     {% endwith %}
     <form action='/action/complete' name='open' method="post">
-      <table>
-        <thead>
+      <div class='tablewrapper'>
+        <table>
+          <thead>
+            <tr>
+              <th> # </th>
+              <th> Date </th>
+              {% if not by_type %}  <th> Type </th> {% endif %}
+              <th> User </th>
+              <th class='wide'> Request </th>
+              <th class='action'> Complete </th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for task in tasks %}
           <tr>
-            <th> # </th> 
-            <th> Date </th> 
-            {% if not by_type %}  <th> Type </th> {% endif %}
-            <th> User </th> 
-            <th class='wide'> Request </th>
-            <th class='action'> Complete </th>
+            <td> {{ loop.index }} </td>
+            <td> {{ task.date }} </td>
+            {% if not by_type %}<td> {{ task.type }} </td>{% endif %}
+            <td> {{ task.user }} </td>
+            <td> {{ task.body }} </td>
+            <td class='action'> <input autocomplete='off' type='checkbox' name="completedTasks" value="{{ task.id }}" />
           </tr>
-        </thead>
-        <tbody>
-        {% for task in tasks %}
-        <tr>
-          <td> {{ loop.index }} </td>
-          <td> {{ task.date }} </td>
-          {% if not by_type %}<td> {{ task.type }} </td>{% endif %}
-          <td> {{ task.user }} </td>
-          <td> {{ task.body }} </td>
-          <td class='action'> <input autocomplete='off' type='checkbox' name="completedTasks" value="{{ task.id }}" />
-        </tr>
-        {% endfor %}
-        {% if tasks|length == 0 %}
-        <tr>
-          <td colspan="6" class='empty-table-message' > No {{ title | lower }} tasks! </td>
-        </tr>
-        {% endif %}
-        </tbody>
-      </table>
+          {% endfor %}
+          {% if tasks|length == 0 %}
+          <tr>
+            <td colspan="6" class='empty-table-message' > No {{ title | lower }} tasks! </td>
+          </tr>
+          {% endif %}
+          </tbody>
+        </table>
+      </div>
       <div class='submit-container'>
         <input type='submit' id='submit' value='Submit Complete Tasks' {% if tasks|length == 0 %} disabled {% endif %} />
         <p>
@@ -57,7 +59,7 @@
         </p>
       </div>
     </form>
-    <footer>    
+    <footer>
       <nav>
         {% if by_type %}
         <a href="{{ url_for('open') }}">All Open</a> |
