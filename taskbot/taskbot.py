@@ -75,7 +75,13 @@ register_uuid() # allow DB to use UUIDs
 ## variables
 prefixes = setup_prefixes(config['taskbot'])
 task_types = config['tasklog']['task_types'].split(',')
-bot = commands.Bot(command_prefix=prefixes, description=config['taskbot']['description'])
+intents = discord.Intents()
+intents.message_content=True
+intents.messages=True
+intents.reactions=True
+intents.guilds=True
+
+bot = commands.Bot(command_prefix=prefixes, description=config['taskbot']['description'], intents=intents)
 conn = db_connect(config['db'])
 
 ## bot setup
@@ -145,12 +151,12 @@ async def _request(ctx, *body):
         cursor.execute(sql_insert, (uuid.uuid4(), task_type, created_by, source, task_body))
         conn.commit()
         if cursor.statusmessage == insert_success:
-            return await ctx.message.add_reaction(emoji='👍')
+            return await ctx.message.add_reaction('👍')
         else:
             return await ctx.send('Failed to store task, please reach out to @{} to notify admins'
                             .format(bot.user.name))
     except:
-        logging.error('Unable to insert task: %s %s %s %s'
+        logging.error('Unable to insert task: {} {} {} {}'
                     .format(task_type, created_by, source, task_body), exc_info=True)
         return await ctx.send("Failed to capture task. Please reach out to @{} to notify admins"
                 .format(bot.user.name))
