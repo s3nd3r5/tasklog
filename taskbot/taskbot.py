@@ -38,7 +38,8 @@ timeFmt='%Y-%m-%dT%H:%M'
 
 ## helper functions
 def setup_prefixes(config):
-    prefixes = config['prefixes'].split(',')
+    # setup prefixes, trim extra whitespace
+    prefixes = [p.strip() for p in config['prefixes'].split(',')]
     if config.getboolean('append_whitespace'):
         prefixes_with_spaces = []
         for p in prefixes:
@@ -46,6 +47,27 @@ def setup_prefixes(config):
         return prefixes_with_spaces
     else:
         return prefixes
+
+def setup_aliases(config, types):
+    alias_map = dict()
+    for t in types:
+        if t in config:
+            t_aliases = config[t]
+            if len(t_aliases) > 0:
+                aliases = [a.strip().lower() for a in t_aliases.split(',')]
+                for a in aliases:
+                    # only one type per alias
+                    # if multiconfig it's latest is greatest!
+                    # todo: check and throw error?
+                    alias_map[a] = t
+
+    return alias_map
+
+# the task command requires the types up front
+# so we need the configured types AND their aliases
+# then the command will basically remap them!
+def setup_task_command_aliases(tasks, aliases):
+    return tasks + list(aliases.keys())
 
 def db_connect(config, max_retries=3):
     retries = 1
@@ -74,7 +96,11 @@ register_uuid() # allow DB to use UUIDs
 
 ## variables
 prefixes = setup_prefixes(config['taskbot'])
-task_types = config['tasklog']['task_types'].split(',')
+# setup task types - lowercase and strip whitespace
+task_types = [t.strip().lower() for t in config['tasklog']['task_types'].split(',')]
+task_aliases = setup_aliases(config['aliases'], task_types)
+task_command_aliases = setup_task_command_aliases(task_types, task_aliases)
+# Setup intents
 intents = discord.Intents()
 intents.message_content=True
 intents.messages=True
@@ -132,15 +158,24 @@ async def list(ctx, completed=False):
 
 @bot.command(name='<task_type>',
         rest_is_raw=True,
-        aliases=task_types,
+        aliases=task_command_aliases,
         brief='Submit a task request',
         help=('Submit a task by specifying one of the task types and a task body. Suppored types: {}'
-            .format(','.join(task_types))))
+            .format(','.join(task_command_aliases))))
 async def _request(ctx, *body):
-    task_type = ctx.invoked_with
-    if not task_type in task_types:
+    task_type = ctx.invoked_with.lower()
+    if not task_type in task_command_aliases:
         return await ctx.send("Invalid task type: {}, valid types are: `{}`"
                 .format(task_type, ','.join(task_types)))
+
+    # get aliased type from task
+    # if not a configured task type
+    if task_type not in task_types and task_type in task_aliases:
+        task_type = task_aliases[task_type]
+    elif task_type not in task_types and task_type not in task_aliases:
+        return await ctx.send("Invalid task type: {}, valid types are: `{}`"
+            .format(task_type, ','.join(task_types)))
+
     created_by = ctx.author.name
     task_body = ' '.join(body)
     source = ('discord/{gid}/{cid}/{gname}/{cname}'
