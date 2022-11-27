@@ -167,6 +167,7 @@ async def _request(ctx, *body):
 async def on_command_error(ctx, error):
     await ctx.message.add_reaction('🙅') # https://emojipedia.org/man-gesturing-no/
     logging.debug('Invalid command: %s', ctx.message.content)
+    await ctx.send("Probable invalid task type - try: `{}` otherwise use the help command.".format(task_command_aliases))
 
 ## run
 token = config['taskbot']['token']
